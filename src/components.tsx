@@ -23,6 +23,7 @@ export async function createComponents(ctx: OnyxiaCtx) {
         { Button },
         { useCoreState },
         { Icon },
+        { IconButton },
         { getIconUrlByName }
     ] = await Promise.all([
         ctx.import("react"),
@@ -34,6 +35,7 @@ export async function createComponents(ctx: OnyxiaCtx) {
         ctx.import("onyxia-ui/Button"),
         ctx.import("core"),
         ctx.import("onyxia-ui/Icon"),
+        ctx.import("onyxia-ui/IconButton"),
         ctx.import("lazy-icons")
     ]);
 
@@ -50,12 +52,18 @@ export async function createComponents(ctx: OnyxiaCtx) {
         return lang === "fr";
     }
 
-    function NewBadge() {
-        const { classes } = useNewBadgeStyles();
+    function NewBadge(props: { size: "small" | "medium" }) {
+        const { size } = props;
+
+        const { classes, cx } = useNewBadgeStyles();
 
         const isFrench = useIsFrench();
 
-        return <span className={classes.root}>{isFrench ? "Nouveau" : "New"}</span>;
+        return (
+            <span className={cx(classes.root, size === "small" && classes.small)}>
+                {isFrench ? "Nouveau" : "New"}
+            </span>
+        );
     }
 
     const useNewBadgeStyles = tss
@@ -63,16 +71,19 @@ export async function createComponents(ctx: OnyxiaCtx) {
         .create(({ theme }) => ({
             root: {
                 display: "inline-block",
-                padding: "1px 7px",
-                borderRadius: 10,
+                padding: theme.spacing({ topBottom: 1, rightLeft: 3 }),
+                borderRadius: 100,
                 backgroundColor: theme.colors.useCases.alertSeverity.info.main,
-                color: theme.colors.useCases.surfaces.background,
-                fontSize: 11,
-                fontWeight: 600,
-                lineHeight: "16px",
-                letterSpacing: 0.3,
+                // NOTE: Dark text in both modes, the info color is light.
+                color: theme.colors.palette.dark.main,
                 whiteSpace: "nowrap",
-                verticalAlign: "middle"
+                verticalAlign: "middle",
+                ...theme.typography.variants["label 2"].style
+            },
+            small: {
+                padding: "1px 7px",
+                fontSize: 11,
+                lineHeight: "16px"
             }
         }));
 
@@ -83,7 +94,7 @@ export async function createComponents(ctx: OnyxiaCtx) {
             return null;
         }
 
-        return <NewBadge />;
+        return <NewBadge size="small" />;
     }
 
     function LauncherAiNotice() {
@@ -101,86 +112,104 @@ export async function createComponents(ctx: OnyxiaCtx) {
 
         return (
             <div className={classes.root} role="note">
-                <NewBadge />
-                <span className={classes.text}>
-                    {isFrench ? (
-                        <>
-                            Ce service peut désormais utiliser un assistant IA,
-                            préconfiguré avec les fournisseurs et le modèle choisis dans{" "}
-                            <a {...accountAiTabLink}>Mon compte → IA</a>.
-                        </>
-                    ) : (
-                        <>
-                            This service can now use an AI assistant, preconfigured with
-                            the providers and model you pick in{" "}
-                            <a {...accountAiTabLink}>My account → AI</a>.
-                        </>
-                    )}
-                </span>
+                <NewBadge size="medium" />
+                <div className={classes.text}>
+                    <span className={classes.title}>
+                        {isFrench
+                            ? "Ce service peut désormais utiliser un assistant IA"
+                            : "This service can now use an AI assistant"}
+                    </span>
+                    <span className={classes.subtitle}>
+                        {isFrench ? (
+                            <>
+                                Gérez vos fournisseurs depuis{" "}
+                                <a {...accountAiTabLink}>votre compte</a>.
+                            </>
+                        ) : (
+                            <>
+                                Manage your providers from{" "}
+                                <a {...accountAiTabLink}>your account</a>.
+                            </>
+                        )}
+                    </span>
+                </div>
                 <button
                     type="button"
                     className={classes.goToAccordionButton}
                     onClick={scrollToAndOpenLauncherAiAccordion}
                 >
                     {isFrench ? "Configurer l'assistant IA" : "Set up the AI assistant"}
-                    <Icon icon={getIconUrlByName("ArrowDownward")} size="small" />
+                    <Icon
+                        className={classes.goToAccordionButtonIcon}
+                        icon={getIconUrlByName("ArrowDownward")}
+                    />
                 </button>
-                <button
-                    type="button"
-                    className={classes.closeButton}
+                <IconButton
+                    icon={getIconUrlByName("Close")}
                     aria-label={isFrench ? "Masquer" : "Dismiss"}
                     onClick={() =>
                         updateAnnouncementState({ isLauncherNoticeDismissed: true })
                     }
-                >
-                    ×
-                </button>
+                />
             </div>
         );
     }
 
     const useLauncherAiNoticeStyles = tss
         .withName("OnyxiaAiAnnouncementLauncherNotice")
-        .create(({ theme }) => ({
-            root: {
-                display: "flex",
-                alignItems: "center",
-                gap: theme.spacing(3),
-                marginBottom: theme.spacing(3),
-                padding: theme.spacing({ topBottom: 3, rightLeft: 4 }),
-                borderRadius: 8,
-                border: `1px solid ${theme.colors.useCases.alertSeverity.info.main}`,
-                backgroundColor: theme.colors.useCases.alertSeverity.info.background,
-                color: theme.colors.useCases.typography.textPrimary,
-                ...theme.typography.variants["body 1"].style
-            },
-            text: {
-                flex: 1,
-                "& a": {
-                    color: theme.colors.useCases.alertSeverity.info.main
+        .create(({ theme }) => {
+            const { main: infoColor } = theme.colors.useCases.alertSeverity.info;
+
+            return {
+                root: {
+                    display: "flex",
+                    alignItems: "center",
+                    gap: theme.spacing(3),
+                    marginBottom: theme.spacing(3),
+                    padding: theme.spacing(3),
+                    borderRadius: 12,
+                    border: `1px solid ${infoColor}`,
+                    backgroundColor: `color-mix(in srgb, ${infoColor} 20%, transparent)`,
+                    color: theme.colors.useCases.typography.textPrimary
+                },
+                text: {
+                    flex: 1,
+                    minWidth: 0,
+                    display: "flex",
+                    flexDirection: "column"
+                },
+                title: {
+                    ...theme.typography.variants["label 1"].style,
+                    fontWeight: 600
+                },
+                subtitle: {
+                    ...theme.typography.variants["body 2"].style,
+                    "& a": {
+                        color: "inherit",
+                        whiteSpace: "nowrap"
+                    }
+                },
+                goToAccordionButton: {
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: theme.spacing(1),
+                    padding: theme.spacing({ topBottom: 1, rightLeft: 3 }),
+                    border: "none",
+                    borderRadius: 100,
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    // NOTE: Inverse colors, like the secondary action of the design system.
+                    backgroundColor: theme.colors.useCases.typography.textPrimary,
+                    color: theme.colors.useCases.surfaces.background,
+                    ...theme.typography.variants["label 2"].style
+                },
+                goToAccordionButtonIcon: {
+                    fontSize: 16,
+                    width: 16,
+                    height: 16
                 }
-            },
-            goToAccordionButton: {
-                display: "inline-flex",
-                alignItems: "center",
-                gap: theme.spacing(2),
-                border: "none",
-                background: "none",
-                cursor: "pointer",
-                padding: 0,
-                whiteSpace: "nowrap",
-                color: theme.colors.useCases.alertSeverity.info.main,
-                ...theme.typography.variants["label 1"].style
-            },
-            closeButton: {
-                border: "none",
-                background: "none",
-                cursor: "pointer",
-                fontSize: 20,
-                lineHeight: 1,
-                color: theme.colors.useCases.typography.textSecondary
-            }
-        }));
+            };
+        });
 
     function ReleaseDialog() {
         const { isReleaseDialogDismissed } = useAnnouncementState();
