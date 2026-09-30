@@ -10,6 +10,13 @@ import { scrollToAndOpenLauncherAiAccordion } from "./launcherDom";
 // TODO: Replace with the documentation page of the AI feature.
 const LEARN_MORE_URL = "https://docs.sspcloud.fr";
 
+// NOTE: Resolved from this bundle (`js/index.mjs`) so it works wherever the plugin
+// is placed in the custom resources.
+const RELEASE_DIALOG_COVER_URL = new URL(
+    "../assets/ai-release-cover.jpg",
+    import.meta.url
+).href;
+
 let isReleaseDialogClosed = false;
 
 export async function createComponents(ctx: OnyxiaCtx) {
@@ -18,7 +25,6 @@ export async function createComponents(ctx: OnyxiaCtx) {
         { tss },
         { routes, useRoute },
         { useLang },
-        { PUBLIC_URL },
         { Dialog },
         { Button },
         { useCoreState },
@@ -30,7 +36,6 @@ export async function createComponents(ctx: OnyxiaCtx) {
         ctx.import("tss"),
         ctx.import("ui/routes"),
         ctx.import("ui/i18n"),
-        ctx.import("env"),
         ctx.import("onyxia-ui/Dialog"),
         ctx.import("onyxia-ui/Button"),
         ctx.import("core"),
@@ -252,7 +257,7 @@ export async function createComponents(ctx: OnyxiaCtx) {
                     <>
                         <img
                             className={classes.cover}
-                            src={`${PUBLIC_URL}/custom-resources/assets/ai-release-cover.jpg`}
+                            src={RELEASE_DIALOG_COVER_URL}
                             alt=""
                         />
                         {isFrench
