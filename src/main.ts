@@ -1,25 +1,13 @@
 import { createComponents } from "./components";
 import { inject, onDomChange } from "./inject";
 import { updateAnnouncementState } from "./announcementState";
+import {
+    getLauncherAiAccordion,
+    getLauncherFirstAccordionIfAiGroup
+} from "./launcherDom";
 
 /** After this date the plugin does nothing, no need to redeploy to end the announcement. */
 const ANNOUNCEMENT_END_DATE = new Date("2026-12-31T23:59:59");
-
-/** Title of the top level group in the InseeFrLab interactive services charts (`properties.ai`). */
-const LAUNCHER_AI_GROUP_TITLE = "AI Assistant";
-
-function getLauncherAiAccordion(): Element | null {
-    for (const element of document.querySelectorAll(
-        `[data-title="${LAUNCHER_AI_GROUP_TITLE}"]`
-    )) {
-        // NOTE: Some charts also have a nested `userPreferences.aiAssistant` group with the same title.
-        if (element.parentElement?.closest("[data-title]") === null) {
-            return element;
-        }
-    }
-
-    return null;
-}
 
 window.onOnyxiaCtxReady = async ctx => {
     if (Date.now() > ANNOUNCEMENT_END_DATE.getTime()) {
@@ -60,7 +48,7 @@ window.onOnyxiaCtxReady = async ctx => {
 
     inject({
         ctx,
-        getTarget: getLauncherAiAccordion,
+        getTarget: getLauncherFirstAccordionIfAiGroup,
         position: "before",
         hostStyle: { display: "block" },
         Component: LauncherAiNotice

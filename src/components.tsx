@@ -5,6 +5,7 @@ import {
     subscribeToAnnouncementState,
     updateAnnouncementState
 } from "./announcementState";
+import { scrollToAndOpenLauncherAiAccordion } from "./launcherDom";
 
 // TODO: Replace with the documentation page of the AI feature.
 const LEARN_MORE_URL = "https://docs.sspcloud.fr";
@@ -20,7 +21,9 @@ export async function createComponents(ctx: OnyxiaCtx) {
         { PUBLIC_URL },
         { Dialog },
         { Button },
-        { useCoreState }
+        { useCoreState },
+        { Icon },
+        { getIconUrlByName }
     ] = await Promise.all([
         ctx.import("react"),
         ctx.import("tss"),
@@ -29,7 +32,9 @@ export async function createComponents(ctx: OnyxiaCtx) {
         ctx.import("env"),
         ctx.import("onyxia-ui/Dialog"),
         ctx.import("onyxia-ui/Button"),
-        ctx.import("core")
+        ctx.import("core"),
+        ctx.import("onyxia-ui/Icon"),
+        ctx.import("lazy-icons")
     ]);
 
     function useAnnouncementState(): AnnouncementState {
@@ -60,7 +65,7 @@ export async function createComponents(ctx: OnyxiaCtx) {
                 display: "inline-block",
                 padding: "1px 7px",
                 borderRadius: 10,
-                backgroundColor: theme.colors.useCases.typography.textFocus,
+                backgroundColor: theme.colors.useCases.alertSeverity.info.main,
                 color: theme.colors.useCases.surfaces.background,
                 fontSize: 11,
                 fontWeight: 600,
@@ -100,20 +105,26 @@ export async function createComponents(ctx: OnyxiaCtx) {
                 <span className={classes.text}>
                     {isFrench ? (
                         <>
-                            Ce service peut désormais utiliser un assistant IA. Choisissez
-                            vos fournisseurs et votre modèle par défaut dans{" "}
-                            <a {...accountAiTabLink}>Mon compte → IA</a>, ils seront
-                            préconfigurés dans la section « AI Assistant » ci-dessous.
+                            Ce service peut désormais utiliser un assistant IA,
+                            préconfiguré avec les fournisseurs et le modèle choisis dans{" "}
+                            <a {...accountAiTabLink}>Mon compte → IA</a>.
                         </>
                     ) : (
                         <>
-                            This service can now use an AI assistant. Pick your providers
-                            and default model in{" "}
-                            <a {...accountAiTabLink}>My account → AI</a>, they will be
-                            preconfigured in the “AI Assistant” section below.
+                            This service can now use an AI assistant, preconfigured with
+                            the providers and model you pick in{" "}
+                            <a {...accountAiTabLink}>My account → AI</a>.
                         </>
                     )}
                 </span>
+                <button
+                    type="button"
+                    className={classes.goToAccordionButton}
+                    onClick={scrollToAndOpenLauncherAiAccordion}
+                >
+                    {isFrench ? "Configurer l'assistant IA" : "Set up the AI assistant"}
+                    <Icon icon={getIconUrlByName("ArrowDownward")} size="small" />
+                </button>
                 <button
                     type="button"
                     className={classes.closeButton}
@@ -135,18 +146,31 @@ export async function createComponents(ctx: OnyxiaCtx) {
                 display: "flex",
                 alignItems: "center",
                 gap: theme.spacing(3),
-                margin: `${theme.spacing(3)}px 0`,
+                marginBottom: theme.spacing(3),
                 padding: theme.spacing({ topBottom: 3, rightLeft: 4 }),
                 borderRadius: 8,
-                backgroundColor: theme.colors.useCases.surfaces.surfaceFocus1,
+                border: `1px solid ${theme.colors.useCases.alertSeverity.info.main}`,
+                backgroundColor: theme.colors.useCases.alertSeverity.info.background,
                 color: theme.colors.useCases.typography.textPrimary,
                 ...theme.typography.variants["body 1"].style
             },
             text: {
                 flex: 1,
                 "& a": {
-                    color: theme.colors.useCases.typography.textFocus
+                    color: theme.colors.useCases.alertSeverity.info.main
                 }
+            },
+            goToAccordionButton: {
+                display: "inline-flex",
+                alignItems: "center",
+                gap: theme.spacing(2),
+                border: "none",
+                background: "none",
+                cursor: "pointer",
+                padding: 0,
+                whiteSpace: "nowrap",
+                color: theme.colors.useCases.alertSeverity.info.main,
+                ...theme.typography.variants["label 1"].style
             },
             closeButton: {
                 border: "none",
