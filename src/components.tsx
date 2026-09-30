@@ -8,7 +8,8 @@ import {
 import { scrollToAndOpenLauncherAiAccordion } from "./launcherDom";
 
 // TODO: Replace with the documentation page of the AI feature.
-const LEARN_MORE_URL = "https://docs.sspcloud.fr";
+const LEARN_MORE_URL =
+    "https://www.sspcloud.fr/document?path=SSPCloud%E2%90%A3Documentation%E2%80%BAUsing%E2%90%A3the%E2%90%A3Datalab%E2%80%BAUsing%E2%90%A3AI%E2%90%A3models%E2%90%A3in%E2%90%A3the%E2%90%A3Datalab";
 
 // NOTE: Resolved from this bundle (`js/index.mjs`) so it works wherever the plugin
 // is placed in the custom resources.
@@ -92,10 +93,11 @@ export async function createComponents(ctx: OnyxiaCtx) {
             }
         }));
 
+    // NOTE: Shown as long as the notice at the top of the launcher is.
     function LauncherAiAccordionBadge() {
-        const { hasOpenedLauncherAiAccordion } = useAnnouncementState();
+        const { isLauncherNoticeDismissed } = useAnnouncementState();
 
-        if (hasOpenedLauncherAiAccordion) {
+        if (isLauncherNoticeDismissed) {
             return null;
         }
 

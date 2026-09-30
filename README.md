@@ -4,9 +4,9 @@ Onyxia plugin announcing the AI feature:
 
 - a release dialog shown to logged in users when they arrive on Onyxia, until they close it
   (for good if they tick "Do not show this message again");
-- a "New" badge on the "AI Assistant" group of the launcher, until the user opens it;
 - a notice at the top of the launcher form, with a link to the AI tab of the account page and
-  a button that scrolls to and opens the "AI Assistant" group; the user can dismiss it.
+  a button that scrolls to and opens the "AI Assistant" group, along with a "New" badge on
+  that group; both go away when the user dismisses the notice.
 
 What the user has seen is stored in `localStorage`. The plugin does nothing after
 `ANNOUNCEMENT_END_DATE` (see `src/main.ts`).

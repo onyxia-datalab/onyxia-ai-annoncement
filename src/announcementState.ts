@@ -4,7 +4,6 @@
  */
 
 export type AnnouncementState = {
-    hasOpenedLauncherAiAccordion: boolean;
     isLauncherNoticeDismissed: boolean;
     isReleaseDialogDismissed: boolean;
 };
@@ -12,7 +11,6 @@ export type AnnouncementState = {
 const STORAGE_KEY = "onyxia-ai-announcement";
 
 const initialState: AnnouncementState = {
-    hasOpenedLauncherAiAccordion: false,
     isLauncherNoticeDismissed: false,
     isReleaseDialogDismissed: false
 };

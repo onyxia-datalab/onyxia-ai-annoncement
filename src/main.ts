@@ -1,6 +1,5 @@
 import { createComponents } from "./components";
-import { inject, onDomChange } from "./inject";
-import { updateAnnouncementState } from "./announcementState";
+import { inject } from "./inject";
 import {
     getLauncherAiAccordion,
     getLauncherFirstAccordionIfAiGroup
@@ -16,16 +15,6 @@ window.onOnyxiaCtxReady = async ctx => {
 
     const { ReleaseDialog, LauncherAiAccordionBadge, LauncherAiNotice } =
         await createComponents(ctx);
-
-    onDomChange(() => {
-        if (
-            getLauncherAiAccordion()?.querySelector(
-                '.MuiAccordionSummary-root[aria-expanded="true"]'
-            ) != null
-        ) {
-            updateAnnouncementState({ hasOpenedLauncherAiAccordion: true });
-        }
-    });
 
     // NOTE: The dialog renders itself in a MUI portal, the host only keeps it mounted.
     inject({
