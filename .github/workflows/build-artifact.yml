@@ -1,0 +1,37 @@
+name: Build artifact
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build onyxia-ai-announcement.zip
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build zip
+        run: npm run build
+
+      - name: Upload zip artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: onyxia-ai-announcement
+          path: onyxia-ai-announcement.zip
+          if-no-files-found: error
+          retention-days: 30
