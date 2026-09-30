@@ -7,7 +7,7 @@ import {
 } from "./launcherDom";
 
 /** After this date the plugin does nothing, no need to redeploy to end the announcement. */
-const ANNOUNCEMENT_END_DATE = new Date("2026-12-31T23:59:59");
+const ANNOUNCEMENT_END_DATE = new Date("2026-10-31T23:59:59");
 
 window.onOnyxiaCtxReady = async ctx => {
     if (Date.now() > ANNOUNCEMENT_END_DATE.getTime()) {
