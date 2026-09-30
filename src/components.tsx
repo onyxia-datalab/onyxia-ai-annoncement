@@ -6,12 +6,30 @@ import {
     updateAnnouncementState
 } from "./announcementState";
 
+// TODO: Replace with the documentation page of the AI feature.
+const LEARN_MORE_URL = "https://docs.sspcloud.fr";
+
+let isReleaseDialogClosed = false;
+
 export async function createComponents(ctx: OnyxiaCtx) {
-    const [React, { tss }, { routes }, { useLang }] = await Promise.all([
+    const [
+        React,
+        { tss },
+        { routes, useRoute },
+        { useLang },
+        { PUBLIC_URL },
+        { Dialog },
+        { Button },
+        { useCoreState }
+    ] = await Promise.all([
         ctx.import("react"),
         ctx.import("tss"),
         ctx.import("ui/routes"),
-        ctx.import("ui/i18n")
+        ctx.import("ui/i18n"),
+        ctx.import("env"),
+        ctx.import("onyxia-ui/Dialog"),
+        ctx.import("onyxia-ui/Button"),
+        ctx.import("core")
     ]);
 
     function useAnnouncementState(): AnnouncementState {
@@ -27,24 +45,18 @@ export async function createComponents(ctx: OnyxiaCtx) {
         return lang === "fr";
     }
 
-    function NewBadge(props: { variant: "pill" | "dot" }) {
-        const { variant } = props;
-
+    function NewBadge() {
         const { classes } = useNewBadgeStyles();
 
         const isFrench = useIsFrench();
 
-        if (variant === "dot") {
-            return <span className={classes.dot} aria-hidden="true" />;
-        }
-
-        return <span className={classes.pill}>{isFrench ? "Nouveau" : "New"}</span>;
+        return <span className={classes.root}>{isFrench ? "Nouveau" : "New"}</span>;
     }
 
     const useNewBadgeStyles = tss
         .withName("OnyxiaAiAnnouncementNewBadge")
         .create(({ theme }) => ({
-            pill: {
+            root: {
                 display: "inline-block",
                 padding: "1px 7px",
                 borderRadius: 10,
@@ -55,44 +67,9 @@ export async function createComponents(ctx: OnyxiaCtx) {
                 lineHeight: "16px",
                 letterSpacing: 0.3,
                 whiteSpace: "nowrap",
-                verticalAlign: "middle",
-                // NOTE: The badge may be portaled inside a link owned by Onyxia. React events
-                // follow the React tree, so a click here would skip the link's SPA onClick.
-                pointerEvents: "none"
-            },
-            dot: {
-                display: "block",
-                width: 10,
-                height: 10,
-                borderRadius: "50%",
-                backgroundColor: theme.colors.useCases.typography.textFocus,
-                boxShadow: `0 0 0 2px ${theme.colors.useCases.surfaces.background}`,
-                pointerEvents: "none"
+                verticalAlign: "middle"
             }
         }));
-
-    function LeftBarAccountBadge() {
-        const { hasVisitedAiTab } = useAnnouncementState();
-
-        if (hasVisitedAiTab) {
-            return null;
-        }
-
-        return <NewBadge variant="dot" />;
-    }
-
-    function AccountAiTabBadge() {
-        const { hasVisitedAiTab } = useAnnouncementState();
-
-        // NOTE: Keep it visible during the first visit so the user sees what was new.
-        const [hadVisitedAiTabOnMount] = React.useState(hasVisitedAiTab);
-
-        if (hadVisitedAiTabOnMount) {
-            return null;
-        }
-
-        return <NewBadge variant="pill" />;
-    }
 
     function LauncherAiAccordionBadge() {
         const { hasOpenedLauncherAiAccordion } = useAnnouncementState();
@@ -101,7 +78,7 @@ export async function createComponents(ctx: OnyxiaCtx) {
             return null;
         }
 
-        return <NewBadge variant="pill" />;
+        return <NewBadge />;
     }
 
     function LauncherAiNotice() {
@@ -119,7 +96,7 @@ export async function createComponents(ctx: OnyxiaCtx) {
 
         return (
             <div className={classes.root} role="note">
-                <NewBadge variant="pill" />
+                <NewBadge />
                 <span className={classes.text}>
                     {isFrench ? (
                         <>
@@ -181,9 +158,110 @@ export async function createComponents(ctx: OnyxiaCtx) {
             }
         }));
 
+    function ReleaseDialog() {
+        const { isReleaseDialogDismissed } = useAnnouncementState();
+
+        const { isUserLoggedIn } = useCoreState("userAuthentication", "main");
+
+        const route = useRoute();
+
+        // NOTE: Closing without ticking the checkbox only hides it until the next page load.
+        // Kept outside of React so that a remount of the plugin component does not reopen it.
+        const [isClosed, setIsClosed] = React.useState(isReleaseDialogClosed);
+        const [doNotShowAgain, setDoNotShowAgain] = React.useState(false);
+
+        const { classes } = useReleaseDialogStyles();
+
+        const isFrench = useIsFrench();
+
+        const close = () => {
+            isReleaseDialogClosed = true;
+            setIsClosed(true);
+
+            if (doNotShowAgain) {
+                updateAnnouncementState({ isReleaseDialogDismissed: true });
+            }
+        };
+
+        return (
+            <Dialog
+                isOpen={isUserLoggedIn && !isReleaseDialogDismissed && !isClosed}
+                onClose={close}
+                showCloseButton={true}
+                maxWidth={false}
+                muiDialogClasses={{ paper: classes.paper }}
+                title={
+                    isFrench
+                        ? "Les modèles d'IA sont disponibles dans vos services"
+                        : "AI models are now available in your services"
+                }
+                body={
+                    <>
+                        <img
+                            className={classes.cover}
+                            src={`${PUBLIC_URL}/custom-resources/assets/ai-release-cover.jpg`}
+                            alt=""
+                        />
+                        {isFrench
+                            ? "Connectez des fournisseurs d'IA, choisissez vos modèles et utilisez-les directement dans les services Onyxia compatibles."
+                            : "Connect AI providers, choose your models, and use them directly in compatible Onyxia services."}
+                    </>
+                }
+                doNotShowNextTimeText={
+                    isFrench
+                        ? "Ne plus afficher ce message"
+                        : "Do not show this message again"
+                }
+                onDoShowNextTimeValueChange={doShowNextTime =>
+                    setDoNotShowAgain(!doShowNextTime)
+                }
+                buttons={
+                    <>
+                        <Button variant="secondary" href={LEARN_MORE_URL}>
+                            {isFrench ? "En savoir plus" : "Learn more"}
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                close();
+
+                                if (
+                                    route.name === "account" &&
+                                    route.params.tabId === "ai"
+                                ) {
+                                    return;
+                                }
+
+                                routes.account({ tabId: "ai" }).push();
+                            }}
+                        >
+                            {isFrench
+                                ? "Configurer les fournisseurs d'IA"
+                                : "Set up AI providers"}
+                        </Button>
+                    </>
+                }
+            />
+        );
+    }
+
+    const useReleaseDialogStyles = tss
+        .withName("OnyxiaAiAnnouncementReleaseDialog")
+        .create(({ theme }) => ({
+            paper: {
+                width: 717,
+                maxWidth: "calc(100% - 32px)"
+            },
+            cover: {
+                display: "block",
+                width: "100%",
+                height: 200,
+                objectFit: "cover",
+                marginBottom: theme.spacing(4)
+            }
+        }));
+
     return {
-        LeftBarAccountBadge,
-        AccountAiTabBadge,
+        ReleaseDialog,
         LauncherAiAccordionBadge,
         LauncherAiNotice
     };

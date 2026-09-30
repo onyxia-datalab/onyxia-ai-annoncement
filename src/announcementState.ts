@@ -4,17 +4,17 @@
  */
 
 export type AnnouncementState = {
-    hasVisitedAiTab: boolean;
     hasOpenedLauncherAiAccordion: boolean;
     isLauncherNoticeDismissed: boolean;
+    isReleaseDialogDismissed: boolean;
 };
 
 const STORAGE_KEY = "onyxia-ai-announcement";
 
 const initialState: AnnouncementState = {
-    hasVisitedAiTab: false,
     hasOpenedLauncherAiAccordion: false,
-    isLauncherNoticeDismissed: false
+    isLauncherNoticeDismissed: false,
+    isReleaseDialogDismissed: false
 };
 
 let state: AnnouncementState = (() => {

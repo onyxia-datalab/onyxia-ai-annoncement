@@ -35,7 +35,7 @@ export function onDomChange(listener: () => void) {
 export function inject(params: {
     ctx: OnyxiaCtx;
     getTarget: () => Element | null;
-    position: "append" | "before";
+    position: "prepend" | "append" | "before";
     hostStyle?: Partial<CSSStyleDeclaration>;
     Component: () => ReactNode;
 }) {
@@ -70,6 +70,11 @@ export function inject(params: {
         }
 
         switch (position) {
+            case "prepend":
+                if (host.parentElement !== target || host.previousSibling !== null) {
+                    target.prepend(host);
+                }
+                break;
             case "append":
                 if (host.parentElement !== target || host.nextSibling !== null) {
                     target.appendChild(host);

@@ -2,10 +2,10 @@
 
 Onyxia plugin announcing the AI feature:
 
-- a dot on the "My account" item of the left bar, until the user visits the AI tab;
-- a "New" badge on the AI tab of the account page, during the first visit;
+- a release dialog shown to logged in users when they arrive on Onyxia, until they close it
+  (for good if they tick "Do not show this message again");
 - a "New" badge on the "AI Assistant" group of the launcher, until the user opens it;
-- a notice above that group, linking to the AI tab, that the user can dismiss.
+- a notice above that group, linking to the AI tab of the account page, that the user can dismiss.
 
 What the user has seen is stored in `localStorage`. The plugin does nothing after
 `ANNOUNCEMENT_END_DATE` (see `src/main.ts`).
@@ -25,9 +25,6 @@ npm run typecheck
 ```
 
 > NOTE: `npm run dev` overwrites `web/.env.local.yaml` with `./.env.local.yaml`.
-
-The account tab badge relies on the `data-onyxia-anchor="account-tab-<id>"` attribute,
-make sure the Onyxia version you target has it.
 
 ## Production Build
 

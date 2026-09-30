@@ -26,18 +26,10 @@ window.onOnyxiaCtxReady = async ctx => {
         return;
     }
 
-    const {
-        LeftBarAccountBadge,
-        AccountAiTabBadge,
-        LauncherAiAccordionBadge,
-        LauncherAiNotice
-    } = await createComponents(ctx);
+    const { ReleaseDialog, LauncherAiAccordionBadge, LauncherAiNotice } =
+        await createComponents(ctx);
 
     onDomChange(() => {
-        if (/\/account\/ai\/?$/.test(location.pathname)) {
-            updateAnnouncementState({ hasVisitedAiTab: true });
-        }
-
         if (
             getLauncherAiAccordion()?.querySelector(
                 '.MuiAccordionSummary-root[aria-expanded="true"]'
@@ -47,25 +39,13 @@ window.onOnyxiaCtxReady = async ctx => {
         }
     });
 
+    // NOTE: The dialog renders itself in a MUI portal, the host only keeps it mounted.
     inject({
         ctx,
-        getTarget: () => document.querySelector("a#account > div:first-child"),
+        getTarget: () => document.body,
         position: "append",
-        hostStyle: {
-            position: "absolute",
-            top: "6px",
-            right: "12px",
-            zIndex: "3"
-        },
-        Component: LeftBarAccountBadge
-    });
-
-    inject({
-        ctx,
-        getTarget: () => document.querySelector('[data-onyxia-anchor="account-tab-ai"]'),
-        position: "append",
-        hostStyle: { display: "inline-flex", marginLeft: "8px" },
-        Component: AccountAiTabBadge
+        hostStyle: { display: "none" },
+        Component: ReleaseDialog
     });
 
     inject({
